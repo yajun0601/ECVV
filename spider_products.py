@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import random
-
 HOST = "http://www.ecvv.com{}"
 
 
@@ -27,7 +26,10 @@ def restart():
 def get_title(url):
     wb_data = requests.get(url)
     soup = BeautifulSoup(wb_data.text, 'lxml')
-    return soup.select("title")[0].text.strip()
+    if "404.0" in soup.text:
+        return "404"
+    else:
+        return soup.select("title")[0].text.strip()
 
 
 def parse_line(line):
@@ -40,9 +42,12 @@ if __name__ == '__main__':
         print(line_numbers)
         url_list = open_products_file(line_numbers)
         for i in url_list:
-            url = HOST.format(parse_line(i))
-            title = get_title(url)
-            print(url,title)
-            w.writelines(title + "\r\n")
+            if "\"" in i:
+                w.writelines("url wrong\r\n")
+            else:
+                url = HOST.format(parse_line(i))
+                title = get_title(url)
+                print(url,title)
+                w.writelines(title + "\r\n")
             time.sleep(0.5+random.random()*5)
 
